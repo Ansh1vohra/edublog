@@ -1,8 +1,9 @@
-import './App.css';
+import React from 'react';
 import { Routes, Route} from 'react-router-dom';
-import Header from './components/Header.tsx';
-import Home from './components/Home.tsx';
-import Login from './components/Login.tsx';
+import Header from './components/Header';
+import Home from './components/Home';
+import Login from './components/Login';
+import './App.css';
 
 function App() {
   return (
