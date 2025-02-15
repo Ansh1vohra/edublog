@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import "./Login.css";
 import { useNavigate } from 'react-router';
 
 export default function Login() {
@@ -62,8 +63,9 @@ export default function Login() {
         
                 const data = await response.json();
                 if (response.ok || data.error==='User already exists') {
-                    nav("/");
+                    localStorage.setItem('userMail',email);
                     setMessage('Login Success');
+                    nav("/");
                 } else {
                     setMessage(data.error || 'Failed to Login');
                 }
@@ -79,7 +81,7 @@ export default function Login() {
     };
 
     return (
-        <div className="flex justify-center mt-8 min-h-[60vh] items-center">
+        <div className="flex justify-center mt-8 loginContainer items-center">
             <div className="bg-white shadow-md rounded-lg p-6 m-4 w-full max-w-md flex flex-col justify-center items-center border border-gray-200">
                 <h2 className="text-2xl font-semibold text-gray-800 mb-4">Login</h2>
                 {!otpSent ? (
