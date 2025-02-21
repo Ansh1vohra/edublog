@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import "./Login.css";
 import { useNavigate } from 'react-router';
+import { useUser } from '../Context/UserContext';
 
 export default function Login() {
     const nav = useNavigate();
+    const { setUserMail } = useUser();
     const [email, setEmail] = useState<string>('');
     const [otp, setOtp] = useState<string>('');
     const [generatedOtp, setGeneratedOtp] = useState<string>('');
@@ -63,6 +65,7 @@ export default function Login() {
         
                 const data = await response.json();
                 if (response.ok || data.error==='User already exists') {
+                    setUserMail(email);
                     localStorage.setItem('userMail',email);
                     setMessage('Login Success');
                     nav("/");

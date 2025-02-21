@@ -1,21 +1,28 @@
 import React from 'react';
+import './App.css';
 import { Routes, Route} from 'react-router-dom';
+import { UserProvider } from './Context/UserContext';
 import Header from './components/Header';
 import Home from './components/Home';
 import Login from './components/Login';
-import { useState } from 'react';
-import './App.css';
+import CreatePost from './components/CreatePost';
+import SingleBlog from './components/SingleBlog';
+import NotFound from './components/NotFound';
 
 function App() {
-  const [userMail, setUserMail] = useState<string>("");
   return (
-    <div className='mainContent h-screen bg-[#FFF9EF]'>
-        <Header />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path='/login' element={<Login />} />
-        </Routes>
-    </div>
+    <UserProvider>
+      <div className='mainContent h-screen bg-[#FFF9EF]'>
+          <Header />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path='/login' element={<Login />} />
+            <Route path='/postblog' element={<CreatePost />} />
+            <Route path="/blog/:id" element={<SingleBlog />} />
+            <Route path='*' element={<NotFound />} />
+          </Routes>
+      </div>
+    </UserProvider>
   );
 }
 
