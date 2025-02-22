@@ -12,7 +12,7 @@ import NotFound from './components/NotFound';
 function App() {
   return (
     <UserProvider>
-      <div className='mainContent h-screen bg-[#FFF9EF]'>
+      <div className='mainContent'>
           <Header />
           <Routes>
             <Route path="/" element={<Home />} />

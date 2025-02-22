@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useUser } from '../Context/UserContext';
 import { Link } from 'react-router';
+import "./Home.css";
 
 interface BlogPostType {
     _id: string;
@@ -88,9 +89,9 @@ export default function Home() {
                     <div className="p-4 m-4 flex">
                         {blogs.map(blog => (
                             <Link to={`/blog/${blog._id}`} key={blog._id}>
-                                <div className='w-64 bg-green-200'>
+                                <div className='card'>
                                     <img src={blog.blogImg} alt="blogImage" />
-                                    <h2>{blog.title}</h2>
+                                    <h2 className='font-semibold p-2'>{blog.title}</h2>
                                 </div>
                             </Link>
                         ))}

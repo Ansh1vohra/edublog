@@ -1,0 +1,22 @@
+.blogContainer{
+    display: flex;
+    flex-direction: column;
+    width: 70vw;
+    padding: 2rem;
+}
+
+.innerblogContainer{
+    display: flex;
+    flex-direction: column;
+    gap:1rem;
+}
+
+.blog-content{
+    white-space: pre-wrap;
+}
+
+@media (max-width:760px) {
+    .blogContainer{
+        width: 100vw;
+    }
+}
