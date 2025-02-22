@@ -19,7 +19,7 @@ interface BlogType {
   content: string;
   blogImg: string;
   userMail: string;
-  date: string;
+  createdAt: string;
   authorName?: string;
 }
 
@@ -36,6 +36,8 @@ export default function BlogDetails() {
         const response = await fetch(`http://localhost:5000/api/blogs/${id}`);
         if (response.ok) {
           const blogData: BlogType = await response.json();
+
+          console.log("Fetched blog data:", blogData);
 
           try {
             const userResponse = await fetch('http://localhost:5000/api/users/fetchUser', {
@@ -80,10 +82,15 @@ export default function BlogDetails() {
         <div>
           <h2 className="text-2xl font-bold">{blog.title}</h2>
           <p className="text-sm text-gray-600">
-            Posted on: {new Date(blog.date).toLocaleDateString()}
+            Posted on: {blog.createdAt ? new Intl.DateTimeFormat("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric"
+            }).format(new Date(blog.createdAt)) : "Unknown Date"}
           </p>
+
         </div>
-        <p className="text-sm">Author: {blog.authorName}</p>
+        <p className="font-bold">By: {blog.authorName}</p>
 
         <img src={blog.blogImg} className='rounded-md' alt="blogImage" />
 

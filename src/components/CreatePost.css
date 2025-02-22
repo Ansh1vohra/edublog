@@ -2,3 +2,18 @@
     width:50vw;
     margin: auto;
 }
+
+.blogForm textarea{
+    min-height: 350px;
+}
+
+.blogForm img{
+    height: 400px;
+    object-fit: cover;
+}
+
+@media screen and (max-width:768px) {
+    .blogForm{
+        width: 100vw;
+    }
+}

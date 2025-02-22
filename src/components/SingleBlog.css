@@ -11,6 +11,11 @@
     gap:1rem;
 }
 
+.blogContainer img{
+    height: 400px;
+    object-fit: cover;
+}
+
 .blog-content{
     white-space: pre-wrap;
 }

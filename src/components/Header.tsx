@@ -17,7 +17,8 @@ export default function Header() {
     return (
         <header className="p-4 bg- flex justify-between items-center">
             <Link to="/">
-                <img src={Logo} alt="Logo" width='180px' />
+                {/* <img src={Logo} alt="Logo" width='180px' /> */}
+                <h1 className='text mx-4 text-2xl font-semibold'>EduBlog</h1>
             </Link>
             {!userMail ? (
                 <nav className="flex gap-4 mx-4">

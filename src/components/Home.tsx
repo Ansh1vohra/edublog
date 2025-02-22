@@ -86,10 +86,10 @@ export default function Home() {
                 ) : error ? (
                     <p className="text-red-500">{error}</p>
                 ) : (
-                    <div className="p-4 m-4 flex">
+                    <div className="p-4 m-4 flex flex-wrap justify-evenly">
                         {blogs.map(blog => (
                             <Link to={`/blog/${blog._id}`} key={blog._id}>
-                                <div className='card'>
+                                <div className='card m-2'>
                                     <img src={blog.blogImg} alt="blogImage" />
                                     <h2 className='font-semibold p-2'>{blog.title}</h2>
                                 </div>

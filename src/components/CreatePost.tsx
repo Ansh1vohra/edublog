@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useUser } from '../Context/UserContext';
 import { useNavigate } from 'react-router-dom';
+import defaultImage from './Images/blog2.png'
 import './CreatePost.css';
 
 export default function CreatePost() {
@@ -9,16 +10,17 @@ export default function CreatePost() {
 
     useEffect(() => {
         if (!userMail) {
-            navigate('/login'); // Redirect to the login page
+            navigate('/login');
         }
     }, [userMail, navigate]);
 
     const [title, setTitle] = useState<string>('');
     const [content, setContent] = useState<string>('');
     const [blogImg, setBlogImg] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [message, setMessage] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
-    const [fileName, setFileName] = useState<string>(''); // State to hold the file name
+    const [fileName, setFileName] = useState<string>('');
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -48,11 +50,11 @@ export default function CreatePost() {
 
             if (response.ok) {
                 setMessage('Blog post created successfully!');
-                // Reset form fields
                 setTitle('');
                 setContent('');
                 setBlogImg(null);
                 setFileName('');
+                setImagePreview(null);
             } else {
                 setMessage(data.error || 'Failed to create blog post.');
             }
@@ -65,11 +67,16 @@ export default function CreatePost() {
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
-            setBlogImg(e.target.files[0]);
-            setFileName(e.target.files[0].name); // Set the file name for display
+            const file = e.target.files[0];
+            setBlogImg(file);
+            setFileName(file.name);
+
+            const previewUrl = URL.createObjectURL(file);
+            setImagePreview(previewUrl);
         } else {
             setBlogImg(null);
             setFileName('');
+            setImagePreview(null);
         }
     };
 
@@ -86,21 +93,26 @@ export default function CreatePost() {
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                     />
-                    <label className="block mt-4">Banner for the Blog:</label>
+                    <label className="block mt-4">Your Own Banner for the Blog:(please upload only 2:1 images and only jpg,png,jpeg)</label>
 
-                    {/* Hidden File Input */}
                     <input
                         type="file"
                         accept="image/*"
                         onChange={handleImageChange}
-                        className="hidden" // Hide the default file input
-                        id="file-input" // Assign an ID to link with the label
+                        className="hidden"
+                        id="file-input"
                     />
 
-                    {/* Custom File Input Label */}
                     <label htmlFor="file-input" className="bg-blue-300 text-white p-2 rounded cursor-pointer hover:bg-blue-400">
-                        {fileName || 'Select Image'} {/* Display selected file name or prompt */}
+                        {fileName || 'Select Image'}
                     </label>
+
+                    {imagePreview ? (
+                        <img src={imagePreview} alt="Preview" className="mt-2 object-cover rounded-lg shadow" />
+                    ) : (
+                        <img src={defaultImage} alt="Preview" className="mt-2 object-cover rounded-lg shadow" />
+                    )}
+
 
                     <textarea
                         placeholder="Blog Content"
