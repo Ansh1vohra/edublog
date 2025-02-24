@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import "./Header.css";
-import Logo from './Images/Logo.png';
 import UserIcon from './Images/user.png';
 import { Link } from 'react-router-dom';
 import { useUser } from '../Context/UserContext';
@@ -17,13 +16,12 @@ export default function Header() {
     return (
         <header className="p-4 bg- flex justify-between items-center">
             <Link to="/">
-                {/* <img src={Logo} alt="Logo" width='180px' /> */}
                 <h1 className='text mx-4 text-2xl font-semibold'>EduBlog</h1>
             </Link>
             {!userMail ? (
                 <nav className="flex gap-4 mx-4">
-                    <Link to="/about" className="text hover:underline">About</Link>
-                    <Link to="/login" className="text hover:underline">Login</Link>
+                    <Link to="/login" className="text bg-purple-600 px-4 py-2 rounded hover:bg-purple-700">Login</Link>
+                    
                 </nav>
             ) : (
                 <nav className="flex gap-4 mx-4 items-center">

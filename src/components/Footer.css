@@ -1,0 +1,45 @@
+.footer {
+    background-color: #343a40;
+    color: #FFF9EF;
+    padding: 1.5rem;
+    margin-top: 1rem;
+    font-family: "Host Grotesk", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal; 
+  }
+  
+  .footer h5 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  
+  .footer p {
+    font-size: 0.875rem;
+  }
+  
+  .footer ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .footer ul li {
+    margin-bottom: 0.5rem;
+  }
+  
+  .footer ul li a {
+    color: white;
+    text-decoration: none;
+  }
+  
+  .footer ul li a:hover {
+    text-decoration: underline;
+  }
+  
+  .footer .social-links a {
+    font-size: 1.5rem;
+    margin-right: 10px;
+  }
+  
+  .footer .social-links a:hover {
+    color: #adb5bd;
+  }

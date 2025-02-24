@@ -8,6 +8,7 @@ import Login from './components/Login';
 import CreatePost from './components/CreatePost';
 import SingleBlog from './components/SingleBlog';
 import NotFound from './components/NotFound';
+import Footer from './components/Footer';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
             <Route path="/blog/:id" element={<SingleBlog />} />
             <Route path='*' element={<NotFound />} />
           </Routes>
+          <Footer />
       </div>
     </UserProvider>
   );
