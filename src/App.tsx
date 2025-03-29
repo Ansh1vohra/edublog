@@ -7,6 +7,8 @@ import Home from './components/Home';
 import Login from './components/Login';
 import CreatePost from './components/CreatePost';
 import SingleBlog from './components/SingleBlog';
+import StudyMaterials from './components/StudyMaterials';
+import About from './components/About';
 import NotFound from './components/NotFound';
 import Footer from './components/Footer';
 
@@ -20,6 +22,8 @@ function App() {
             <Route path='/login' element={<Login />} />
             <Route path='/postblog' element={<CreatePost />} />
             <Route path="/blog/:id" element={<SingleBlog />} />
+            <Route path='/studymaterial' element={<StudyMaterials />} />
+            <Route path='/about' element={<About />} />
             <Route path='*' element={<NotFound />} />
           </Routes>
           <Footer />

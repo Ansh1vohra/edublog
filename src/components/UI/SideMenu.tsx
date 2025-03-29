@@ -36,6 +36,12 @@ const SideMenu: React.FC<SideMenuProps> = ({ isOpen, onClose }) => {
                         <Link to="/postblog" onClick={onClose}>Post a Blog</Link>
                     </li>
                     <li>
+                        <Link to="/studymaterial" onClick={onClose}>Study Material</Link>
+                    </li>
+                    <li>
+                        <Link to="/about" onClick={onClose}>About</Link>
+                    </li>
+                    <li>
                         <button onClick={handleLogOut}>Logout</button>
                     </li>
                 </ul>

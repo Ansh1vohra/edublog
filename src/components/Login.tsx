@@ -25,7 +25,7 @@ export default function Login() {
         setGeneratedOtp(newOtp);
     
         try {
-            const response = await fetch('http://localhost:5000/api/users/sendOTP', {
+            const response = await fetch('https://edublog-server.vercel.app/api/users/sendOTP', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -55,7 +55,7 @@ export default function Login() {
             setMessage('OTP Verified!');
             const uname = email.split("@");
             try {
-                const response = await fetch('http://localhost:5000/api/users/storeUser', {
+                const response = await fetch('https://edublog-server.vercel.app/api/users/storeUser', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

@@ -41,7 +41,7 @@ export default function CreatePost() {
         }
 
         try {
-            const response = await fetch('http://localhost:5000/api/blogs', {
+            const response = await fetch('https://edublog-server.vercel.app/api/blogs', {
                 method: 'POST',
                 body: formData,
             });

@@ -1,15 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import {
-  FacebookShareButton,
-  TwitterShareButton,
-  LinkedinShareButton,
-  WhatsappShareButton,
-  FacebookIcon,
-  TwitterIcon,
-  LinkedinIcon,
-  WhatsappIcon,
-} from 'react-share';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useUser } from "../Context/UserContext";
 import "./SingleBlog.css";
 
 interface BlogType {
@@ -32,186 +23,241 @@ interface CommentType {
 
 export default function BlogDetails() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { userMail } = useUser();
   const [blog, setBlog] = useState<BlogType | null>(null);
-  const [shareUrl, setShareUrl] = useState<string>('');
   const [comments, setComments] = useState<CommentType[]>([]);
-  const [newComment, setNewComment] = useState({ text: '', author: '' });
+  const [commentText, setCommentText] = useState("");
   const [replyText, setReplyText] = useState<{ [key: string]: string }>({});
+  const [showCommentBox, setShowCommentBox] = useState(false);
+  const [showReplyBox, setShowReplyBox] = useState<{ [key: string]: boolean }>({});
 
-
-  async function fetchComments() {
-    try {
-      const response = await fetch(`http://localhost:5000/api/posts/${id}/comments`);
-      if (response.ok) {
-        const commentsData: CommentType[] = await response.json();
-        setComments(commentsData);
-      }
-    } catch (error) {
-      console.error('Error fetching comments:', error);
-    }
-  }
 
   useEffect(() => {
-    setShareUrl(window.location.href);
-
-    async function fetchBlog() {
+    async function fetchBlogAndComments() {
       try {
-        const response = await fetch(`http://localhost:5000/api/blogs/${id}`);
-        if (response.ok) {
-          const blogData: BlogType = await response.json();
+        // Fetch Blog
+        const blogResponse = await fetch(`https://edublog-server.vercel.app/api/blogs/${id}`);
+        if (blogResponse.ok) {
+          const blogData: BlogType = await blogResponse.json();
 
-          try {
-            const userResponse = await fetch('http://localhost:5000/api/users/fetchUser', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ userMail: blogData.userMail }),
-            });
+          // Fetch Author Name
+          const userResponse = await fetch("https://edublog-server.vercel.app/api/users/fetchUser", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userMail: blogData.userMail }),
+          });
 
-            if (userResponse.ok) {
-              const user = await userResponse.json();
-              blogData.authorName = user.authorName || 'Unknown Author';
-            } else {
-              blogData.authorName = 'Unknown Author';
-            }
-          } catch (err) {
-            blogData.authorName = 'Unknown Author';
+          if (userResponse.ok) {
+            const user = await userResponse.json();
+            blogData.authorName = user.authorName || "Unknown Author";
+          } else {
+            blogData.authorName = "Unknown Author";
           }
 
           setBlog(blogData);
-          fetchComments();
-        } else {
-          console.error('Failed to fetch blog');
+        }
+
+        // Fetch Comments
+        const commentsResponse = await fetch(`https://edublog-server.vercel.app/api/comments/posts/${id}/comments`);
+        if (commentsResponse.ok) {
+          setComments(await commentsResponse.json());
         }
       } catch (error) {
-        console.error('Error fetching blog:', error);
+        console.error("Error fetching blog/comments:", error);
       }
     }
 
-    fetchBlog();
+    fetchBlogAndComments();
   }, [id]);
 
-  async function handleAddComment() {
-    if (!newComment.text || !newComment.author) return;
+  // Handle Adding Comment
+  const handleAddComment = async () => {
+    if (!userMail) {
+      alert("Please sign in to add a comment.");
+      navigate("/signin"); // Redirect to Sign-In page
+      return;
+    }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/posts/${id}/comments`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newComment),
+      const userResponse = await fetch("https://edublog-server.vercel.app/api/users/fetchUser", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userMail }),
+      });
+
+      if (!userResponse.ok) throw new Error("Failed to fetch user");
+
+      const user = await userResponse.json();
+      const authorName = user.authorName || "Anonymous";
+
+      const response = await fetch(`https://edublog-server.vercel.app/api/comments/posts/${id}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: commentText, author: authorName }),
       });
 
       if (response.ok) {
-        setNewComment({ text: '', author: '' });
-        fetchComments();
+        setCommentText("");
+        setComments([...comments, { _id: Date.now().toString(), text: commentText, author: authorName, createdAt: new Date().toISOString(), replies: [] }]);
       }
     } catch (error) {
-      console.error('Error adding comment:', error);
+      console.error("Error adding comment:", error);
     }
-  }
+  };
 
-  async function handleAddReply(commentId: string) {
-    if (!replyText[commentId]) return;
+  // Handle Adding Reply
+  const handleAddReply = async (commentId: string) => {
+    if (!userMail) {
+      alert("Please sign in to reply.");
+      navigate("/signin");
+      return;
+    }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/comments/${commentId}/replies`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: replyText[commentId], author: 'User' }),
+      const userResponse = await fetch("https://edublog-server.vercel.app/api/users/fetchUser", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userMail }),
+      });
+
+      if (!userResponse.ok) throw new Error("Failed to fetch user");
+
+      const user = await userResponse.json();
+      const authorName = user.authorName || "Anonymous";
+
+      const response = await fetch(`https://edublog-server.vercel.app/api/comments/commentReply/${commentId}/replies`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: replyText[commentId], author: authorName }),
       });
 
       if (response.ok) {
-        setReplyText((prev) => ({ ...prev, [commentId]: '' }));
-        fetchComments();
+        setReplyText({ ...replyText, [commentId]: "" });
+        setComments(comments.map((comment) => (comment._id === commentId ? { ...comment, replies: [...comment.replies, { text: replyText[commentId], author: authorName, createdAt: new Date().toISOString() }] } : comment)));
       }
     } catch (error) {
-      console.error('Error adding reply:', error);
+      console.error("Error adding reply:", error);
     }
-  }
+  };
 
-  if (!blog) {
-    return <div className="p-4 mt-4 h-96">Loading...</div>;
-  }
+  if (!blog) return <div className="p-4 mt-4 h-96">Loading...</div>;
 
   return (
     <div className="blogContainer">
-      <div className='innerblogContainer'>
+      <div className="innerblogContainer">
         <h2 className="text-2xl font-bold">{blog.title}</h2>
-        <p className="text-sm text-gray-600">
-          Posted on: {new Intl.DateTimeFormat("en-US", { year: "numeric", month: "long", day: "numeric" }).format(new Date(blog.createdAt))}
-        </p>
+        <p className="text-sm text-gray-600">Posted on: {new Intl.DateTimeFormat("en-US", { year: "numeric", month: "long", day: "numeric" }).format(new Date(blog.createdAt))}</p>
         <p className="font-bold">By: {blog.authorName}</p>
-        <img src={blog.blogImg} className='rounded-md' alt="blogImage" />
+        <img src={blog.blogImg} className="rounded-md" alt="blogImage" />
         <p className="whitespace-pre-wrap leading-relaxed">{blog.content}</p>
 
-        {/* Share buttons */}
-        <div className="mb-3 space-x-2">
-          <FacebookShareButton url={shareUrl} hashtag={`#${blog.title}`}>
-            <FacebookIcon size={32} round />
-          </FacebookShareButton>
-          <TwitterShareButton url={shareUrl} title={blog.title}>
-            <TwitterIcon size={32} round />
-          </TwitterShareButton>
-          <LinkedinShareButton url={shareUrl} title={blog.title}>
-            <LinkedinIcon size={32} round />
-          </LinkedinShareButton>
-          <WhatsappShareButton url={shareUrl} title={blog.title}>
-            <WhatsappIcon size={32} round />
-          </WhatsappShareButton>
-        </div>
+        <div className="comments-section">
+          <h3 className="text-lg font-bold mt-4">Comments</h3>
 
-        {/* Comments Section */}
-        <h3 className="mt-6 text-xl font-semibold">Comments</h3>
-        <div className="mt-4">
-          {comments.map((comment) => (
-            <div key={comment._id} className="border p-3 mb-3 rounded-md">
-              <p className="font-semibold">{comment.author}:</p>
-              <p>{comment.text}</p>
-              <p className="text-sm text-gray-500">{new Date(comment.createdAt).toLocaleString()}</p>
-
-              {/* Replies */}
-              <div className="ml-4 mt-2">
-                {comment.replies.map((reply, index) => (
-                  <div key={index} className="border-l pl-2 ml-2">
-                    <p className="font-semibold">{reply.author}:</p>
-                    <p>{reply.text}</p>
-                    <p className="text-xs text-gray-500">{new Date(reply.createdAt).toLocaleString()}</p>
-                  </div>
-                ))}
-              </div>
-
-              {/* Add Reply */}
-              <input
-                type="text"
-                placeholder="Write a reply..."
-                className="border p-2 mt-2 w-full rounded-md"
-                value={replyText[comment._id] || ''}
-                onChange={(e) => setReplyText((prev) => ({ ...prev, [comment._id]: e.target.value }))}
-              />
-              <button onClick={() => handleAddReply(comment._id)} className="bg-blue-500 text-white px-3 py-1 rounded-md mt-2">
-                Reply
+          {/* Toggle Comment Box */}
+          {userMail ? (
+            <>
+              <button
+                onClick={() => setShowCommentBox(!showCommentBox)}
+                className="mt-2 bg-blue-500 text-white px-4 py-2 rounded-md"
+              >
+                {showCommentBox ? "Cancel" : "Add Comment"}
               </button>
+
+              {showCommentBox && (
+                <div className="mt-2">
+                  <textarea
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    placeholder="Write a comment..."
+                    className="w-full p-2 border rounded-md"
+                  ></textarea>
+                  <button
+                    onClick={handleAddComment}
+                    className="mt-2 bg-blue-500 text-white px-4 py-2 rounded-md"
+                  >
+                    Submit
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            <button
+              onClick={() => navigate("/login")}
+              className="mt-2 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+            >
+              Sign in to Comment
+            </button>
+          )}
+
+          {/* Display Comments */}
+          {comments.map((comment) => (
+            <div key={comment._id} className="mt-4 border p-2 rounded-md">
+              <p>
+                <b>{comment.author}</b>: {comment.text}
+              </p>
+              <p className="text-xs text-gray-500">
+                {new Date(comment.createdAt).toLocaleString()}
+              </p>
+
+              {/* Toggle Reply Box */}
+              {userMail ? (
+                <>
+                  <button
+                    onClick={() =>
+                      setShowReplyBox({
+                        ...showReplyBox,
+                        [comment._id]: !showReplyBox[comment._id],
+                      })
+                    }
+                    className="mt-2 bg-green-500 text-white px-4 py-2 rounded-md"
+                  >
+                    {showReplyBox[comment._id] ? "Cancel" : "Reply"}
+                  </button>
+
+                  {showReplyBox[comment._id] && (
+                    <div className="my-4">
+                      <textarea
+                        value={replyText[comment._id] || ""}
+                        onChange={(e) =>
+                          setReplyText({ ...replyText, [comment._id]: e.target.value })
+                        }
+                        placeholder="Reply..."
+                        className="w-full p-2 border rounded-md"
+                      ></textarea>
+                      <button
+                        onClick={() => handleAddReply(comment._id)}
+                        className="mt-1 bg-green-500 text-white px-4 py-2 rounded-md"
+                      >
+                        Submit Reply
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <button
+                  onClick={() => navigate("/login")}
+                  className="mt-1 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+                >
+                  Sign in to Reply
+                </button>
+              )}
+
+              {/* Display Replies */}
+              {comment.replies.map((reply, index) => (
+                <div key={index}>
+                  <p className="ml-4 text-sm">
+                    <b>{reply.author}</b>: {reply.text}
+                  </p>
+                  <p className="ml-4 text-xs text-gray-500">
+                    {new Date(reply.createdAt).toLocaleString()}
+                  </p>
+                </div>
+              ))}
             </div>
           ))}
         </div>
-
-        {/* Add Comment */}
-        <h3 className="mt-6 text-xl font-semibold">Add a Comment</h3>
-        <input
-          type="text"
-          placeholder="Your name"
-          className="border p-2 w-full rounded-md mt-2"
-          value={newComment.author}
-          onChange={(e) => setNewComment({ ...newComment, author: e.target.value })}
-        />
-        <textarea
-          placeholder="Write a comment..."
-          className="border p-2 w-full rounded-md mt-2"
-          value={newComment.text}
-          onChange={(e) => setNewComment({ ...newComment, text: e.target.value })}
-        />
-        <button onClick={handleAddComment} className="bg-green-500 text-white px-3 py-1 rounded-md mt-2">
-          Comment
-        </button>
       </div>
     </div>
   );

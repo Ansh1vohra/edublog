@@ -1,0 +1,41 @@
+.sidefix {
+    position: absolute;
+    left: 10px;
+    width: 250px; 
+    height: calc(100vh - 100px);
+    background-color: #b0ffaa;
+    padding: 1rem;
+    border-radius: 0.4rem;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+    z-index: 5;
+}
+
+.sidefix nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidefix nav ul li {
+    padding: 1rem;
+    text-align: center;
+}
+
+.sidefix nav ul li:hover {
+    color: rgb(83, 83, 83);
+}
+
+/* Ensure the main content doesn't overlap */
+main {
+    margin-left: 250px; /* Should be slightly larger than sidebar width */
+}
+
+@media screen and (max-width: 768px) {
+    .sidefix {
+        display: none; /* Hides sidebar on smaller screens */
+    }
+    main{
+        margin-left: 0px;
+    }
+}
+
+

@@ -3,6 +3,7 @@ import { useUser } from '../Context/UserContext';
 import { Link } from 'react-router';
 import "./Home.css";
 
+
 interface BlogPostType {
     _id: string;
     title: string;
@@ -25,7 +26,7 @@ export default function Home() {
         const fetchUserDetails = async () => {
             if (userMail) {
                 try {
-                    const response = await fetch('http://localhost:5000/api/users/fetchUser', {
+                    const response = await fetch('https://edublog-server.vercel.app/api/users/fetchUser', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ userMail: userMail }),
@@ -48,7 +49,7 @@ export default function Home() {
 
         const fetchBlogs = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/blogs');
+                const response = await fetch('https://edublog-server.vercel.app/api/blogs');
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
