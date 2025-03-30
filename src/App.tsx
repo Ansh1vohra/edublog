@@ -8,9 +8,10 @@ import Login from './components/Login';
 import CreatePost from './components/CreatePost';
 import SingleBlog from './components/SingleBlog';
 import StudyMaterials from './components/StudyMaterials';
+import Profile from './components/Profile';
 import About from './components/About';
-import NotFound from './components/NotFound';
 import Footer from './components/Footer';
+import NotFound from './components/NotFound';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
             <Route path="/blog/:id" element={<SingleBlog />} />
             <Route path='/studymaterial' element={<StudyMaterials />} />
             <Route path='/about' element={<About />} />
+            <Route path='/profile' element={<Profile />} />
             <Route path='*' element={<NotFound />} />
           </Routes>
           <Footer />
