@@ -2,5 +2,10 @@
     min-height: 80vh;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+}
+
+.your-blog{
+    min-width: 300px;
 }

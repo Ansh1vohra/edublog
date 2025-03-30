@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useUser } from "../Context/UserContext";
+import { Link } from "react-router";
 import "./Profile.css";
+import "./Home.css"
+
+interface Blog {
+    _id: string;
+    title: string;
+}
 
 export default function Profile() {
     const { userMail } = useUser();
@@ -11,9 +18,14 @@ export default function Profile() {
     const [newName, setNewName] = useState("");
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [pageLoading, setPageLoading] = useState(true);
     const [loading, setLoading] = useState(false);
     const [nameLoading, setNameLoading] = useState(false);
     const [error, setError] = useState("");
+    const [blogError, setBlogError] = useState("");
+    const [blogData, setBlogData] = useState<Blog[]>([]);
+
+
 
     // Function to fetch user details
     const fetchUserDetails = async () => {
@@ -30,6 +42,9 @@ export default function Profile() {
             });
 
             const data = await response.json();
+            if (data) {
+                setPageLoading(false);
+            }
             if (response.ok) {
                 setUserData({ authorName: data.authorName, imgUrl: data.imgUrl });
                 setNewName(data.authorName);
@@ -41,8 +56,39 @@ export default function Profile() {
         }
     };
 
+    const fetchUserBlogs = async () => {
+        setPageLoading(true);
+        if (!userMail) {
+            console.log("User email is undefined, skipping API call.");
+            return;
+        }
+
+        try {
+            const response = await fetch(`https://edublog-server.vercel.app/api/blogs/blogsByUser/${userMail}`, {
+                method: "GET",
+                headers: { "Content-Type": "application/json" },
+            });
+
+            const data = await response.json();
+            if (data){
+                setPageLoading(false);
+            }
+
+            if (response.ok) {
+                setBlogData(data);
+                console.log(data);
+            } else {
+                setBlogError(data.error);
+            }
+
+        } catch (error) {
+            setBlogError("Some Problem in fetching the Blogs");
+        }
+    }
+
     useEffect(() => {
         fetchUserDetails();
+        fetchUserBlogs();
     }, [userMail]);
 
     // Function to update user name
@@ -62,7 +108,11 @@ export default function Profile() {
                 console.log(data.message);
                 const element = document.getElementById("updatedNameMsg");
                 if (element) {
-                    element.innerHTML = data.message;
+                    if (data.message == undefined) {
+                        element.innerHTML = data.error;
+                    } else {
+                        element.innerHTML = data.message;
+                    }
                     element.classList.remove("hidden");
                 }
             } else {
@@ -94,7 +144,7 @@ export default function Profile() {
 
         setLoading(true);
         try {
-            const response = await fetch("http://localhost:5000/api/users/updateAuthorImage", {
+            const response = await fetch("https://edublog-server.vercel.app/api/users/updateAuthorImage", {
                 method: "PUT",
                 body: formData,
             });
@@ -102,7 +152,7 @@ export default function Profile() {
             const data = await response.json();
             if (data) {
                 setLoading(false);
-                console.log(data.message);
+                console.log(data);
                 const element = document.getElementById("updatedImgMsg");
                 if (element) {
                     element.innerHTML = data.message;
@@ -120,7 +170,13 @@ export default function Profile() {
 
     return (
         <>
-            {userMail ? (
+            {pageLoading ? (
+                <div className="flex items-center justify-center h-80">
+                    <div className='h-80'>
+                        <div className="m-6 loader"></div>
+                    </div>
+                </div>
+            ) : userMail ? (
                 <div className="profile-section">
                     <div className="flex flex-col items-center p-6 bg-green-100 mx-2 rounded">
                         <h1 className="text-3xl font-bold">Profile</h1>
@@ -161,6 +217,26 @@ export default function Profile() {
                                 <p id="updatedNameMsg" className="text-center hidden"></p>
                             </div>
                         </div>
+                    </div>
+                    <div className="your-blog flex flex-col items-center p-6 bg-green-100 m-4 rounded">
+                        <h1 className="text-3xl font-bold">Your Blogs</h1>
+                        {blogError ? (
+                            <p className="text-red-500">{blogError}</p>
+                        ) : (
+                            <ul>
+                                {blogData.length > 0 ? (
+                                    blogData.map((blog, index) => (
+                                        <Link to={`/blog/${blog._id}`}>
+                                            <li key={index} className="border p-4 m-2 rounded bg-white shadow">
+                                                <h2 className="text-xl font-semibold">{blog.title}</h2>
+                                            </li>
+                                        </Link>
+                                    ))
+                                ) : (
+                                    <p>No blogs found.</p>
+                                )}
+                            </ul>
+                        )}
                     </div>
                 </div>
 

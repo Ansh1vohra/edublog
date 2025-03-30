@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useUser } from "../Context/UserContext";
 import "./SingleBlog.css";
+import "./Home.css"
 
 interface BlogType {
   _id: string;
@@ -141,7 +142,11 @@ export default function BlogDetails() {
     }
   };
 
-  if (!blog) return <div className="p-4 mt-4 h-96">Loading...</div>;
+  if (!blog) return <div className="p-4 mt-4 h-96">
+    <div className='h-80'>
+      <div className="m-6 loader"></div>
+    </div>
+  </div>;
 
   return (
     <div className="blogContainer">
