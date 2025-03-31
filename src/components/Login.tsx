@@ -11,17 +11,33 @@ export default function Login() {
     const [generatedOtp, setGeneratedOtp] = useState<string>('');
     const [otpSent, setOtpSent] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
-    const [dbLoading,setDbLoading] = useState<boolean>(false);
+    const [dbLoading, setDbLoading] = useState<boolean>(false);
     const [message, setMessage] = useState<string>('');
 
-    
+    const collegeDomain = "@vitstudent.ac.in";
+
+    const extractAuthorName = (email: string) => {
+        const regex = /^([a-zA-Z]+)\.([a-zA-Z]+)\d{4}@vitstudent\.ac\.in$/;
+        const match = email.match(regex);
+        if (match) {
+            return `${match[1]} ${match[2]}`; // Extracts Firstname Lastname
+        }
+        return "";
+    };
+
     const handleSendOtp = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
         setMessage('');
+        
+        if (!email.endsWith(collegeDomain)) {
+            setMessage('Only VIT students can login with their official email.');
+            return;
+        }
+
+        setLoading(true);
     
         // Generate OTP
-        const newOtp = Math.floor(100000 + Math.random() * 900000).toString(); 
+        const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
         setGeneratedOtp(newOtp);
     
         try {
@@ -30,7 +46,7 @@ export default function Login() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ email:email, OTP:newOtp }),
+                body: JSON.stringify({ email: email, OTP: newOtp }),
             });
     
             const data = await response.json();
@@ -47,26 +63,33 @@ export default function Login() {
             setLoading(false);
         }
     };
-    
 
-    const handleVerifyOtp = async() => {
+    const handleVerifyOtp = async () => {
         setDbLoading(true);
+
         if (otp === generatedOtp) {
+            const authorName = extractAuthorName(email);
+            if (!authorName) {
+                setMessage("Invalid VIT email format. Please try again.");
+                setDbLoading(false);
+                return;
+            }
+
             setMessage('OTP Verified!');
-            const uname = email.split("@");
+
             try {
                 const response = await fetch('https://edublog-server.vercel.app/api/users/storeUser', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ userMail:email,authorName:uname[0] }),
+                    body: JSON.stringify({ userMail: email, authorName: authorName }),
                 });
-        
+
                 const data = await response.json();
-                if (response.ok || data.error==='User already exists') {
+                if (response.ok || data.error === 'User already exists') {
                     setUserMail(email);
-                    localStorage.setItem('userMail',email);
+                    localStorage.setItem('userMail', email);
                     setMessage('Login Success');
                     nav("/");
                 } else {
@@ -80,6 +103,7 @@ export default function Login() {
             }
         } else {
             setMessage('Incorrect OTP. Please try again.');
+            setDbLoading(false);
         }
     };
 
@@ -94,7 +118,7 @@ export default function Login() {
                                 type="email"
                                 id="email"
                                 className="mt-1 p-3 w-full rounded-md border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                placeholder="Enter Your e-mail"
+                                placeholder="Enter Your VIT e-mail"
                                 required
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
@@ -105,7 +129,7 @@ export default function Login() {
                             className={`w-full py-3 px-4 rounded-md text-white font-semibold bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                             disabled={loading}
                         >
-                            {loading ? 'Send OTP' : 'Send OTP'}
+                            {loading ? 'Sending OTP...' : 'Send OTP'}
                         </button>
                     </form>
                 ) : (
@@ -124,9 +148,9 @@ export default function Login() {
                         <button
                             className="w-full py-3 px-4 rounded-md text-white font-semibold bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
                             onClick={handleVerifyOtp}
-                            disabled = {dbLoading}
+                            disabled={dbLoading}
                         >
-                            {dbLoading ? 'Verify OTP' :'Verify OTP'}
+                            {dbLoading ? 'Verifying...' : 'Verify OTP'}
                         </button>
                     </div>
                 )}
